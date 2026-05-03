@@ -3,315 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>跨越千里的爱 - 母亲节快乐</title>
+    <title>给妈妈的专属树洞</title>
     <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-pink: #fce4ec;
-            --accent-gold: #d4a373;
-            --text-color: #4a3c3c;
+            --accent: #ff8fa3;
+            --glass: rgba(255, 255, 255, 0.25);
+            --text: #5a4747;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Noto Serif SC', serif;
-            background: #fff;
-            color: var(--text-color);
-            overflow: hidden; /* 禁止原生滚动，使用卡片切换 */
-        }
-
-        /* 动态背景背景 */
-        .bg-gradient {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at top left, #fff5f7 0%, #ffeef2 100%);
-            z-index: -2;
-        }
-
-        /* 卡片容器 */
-        .swiper-container {
+            background: #fff5f7;
+            color: var(--text);
+            overflow: hidden;
             height: 100vh;
-            width: 100%;
+        }
+
+        /* 动态粒子背景画布 */
+        #canvas {
+            position: fixed;
+            top: 0; left: 0;
+            z-index: -1;
+            background: linear-gradient(180deg, #fff5f7 0%, #ffe4e9 100%);
+        }
+
+        /* 音乐播放器 */
+        .music-player {
+            position: fixed;
+            top: 20px; right: 20px;
+            z-index: 1000;
+            width: 40px; height: 40px;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(255,255,255,0.5);
+            animation: rotate 5s linear infinite;
+            animation-play-state: paused;
+            cursor: pointer;
+        }
+        .music-player.playing { animation-play-state: running; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* 全屏翻页系统 */
+        .swiper {
+            height: 100vh; width: 100%;
             position: relative;
         }
 
-        .section {
+        .page {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 30px;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 30px;
             opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+            transform: scale(1.1);
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: none;
             text-align: center;
         }
 
-        .section.active {
+        .page.active {
             opacity: 1;
-            transform: translateY(0);
+            transform: scale(1);
             pointer-events: auto;
         }
 
-        /* 装饰物 */
-        .floating-element {
-            position: absolute;
-            z-index: -1;
-            filter: blur(1px);
-            animation: float 6s infinite ease-in-out;
+        /* 高级感文字效果 */
+        h1 { font-family: 'Ma Shan Zheng', cursive; font-size: 3rem; color: var(--accent); margin-bottom: 1rem; }
+        .quote { font-size: 1.1rem; line-height: 2; letter-spacing: 1px; color: #7d6666; }
+        .highlight { color: var(--accent); font-weight: 600; border-bottom: 2px dashed var(--accent); }
+
+        /* 磨砂玻璃卡片 */
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 40px 10px 40px 10px;
+            padding: 35px 25px;
+            box-shadow: 0 20px 50px rgba(255, 143, 163, 0.15);
+            max-width: 90%;
         }
 
-        /* 第一页：封面 */
-        .title-main {
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: 3.5rem;
-            color: #d4748a;
-            margin-bottom: 20px;
-        }
-
-        .subtitle {
-            font-size: 0.9rem;
-            letter-spacing: 4px;
-            color: #b8a0a0;
-            text-transform: uppercase;
-        }
-
-        /* 第二页：梨与思念 */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            border-radius: 30px;
-            padding: 40px 25px;
-            box-shadow: 0 15px 35px rgba(212, 116, 138, 0.1);
-        }
-
-        .content-text {
-            font-size: 1.1rem;
-            line-height: 2;
-            margin: 20px 0;
-        }
-
-        .highlight-item {
-            display: inline-block;
-            background: linear-gradient(120deg, transparent 0%, #fff0f3 0%, #fff0f3 100%);
-            padding: 0 5px;
-            font-weight: 600;
-        }
-
-        /* 第三页：奶粉与牵挂 */
-        .circle-deco {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #fff 0%, #fce4ec 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 50px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-        }
-
-        /* 引导箭头 */
-        .scroll-hint {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
+        /* 引导动画 */
+        .arrow {
+            position: fixed; bottom: 20px; left: 50%;
             transform: translateX(-50%);
+            font-size: 20px; color: var(--accent);
             animation: bounce 2s infinite;
-            color: #d4748a;
-            font-size: 24px;
-            z-index: 10;
         }
 
-        /* 进度条 */
-        .progress-dots {
-            position: fixed;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 100;
-        }
+        @keyframes bounce { 0%,20%,50%,80%,100% {transform:translateX(-50%) translateY(0)} 40% {transform:translateX(-50%) translateY(-10px)} 60% {transform:translateX(-50%) translateY(-5px)} }
 
-        .dot {
-            width: 6px;
-            height: 6px;
-            background: #d4748a;
-            opacity: 0.3;
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-
-        .dot.active {
-            opacity: 1;
-            height: 20px;
-            border-radius: 10px;
-        }
-
-        /* 动画 */
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-            40% { transform: translateX(-50%) translateY(-10px); }
-            60% { transform: translateX(-50%) translateY(-5px); }
-        }
-
-        .btn-interact {
-            margin-top: 20px;
-            padding: 12px 30px;
-            border-radius: 25px;
-            border: none;
-            background: #d4748a;
-            color: white;
-            font-family: inherit;
-            box-shadow: 0 5px 15px rgba(212, 116, 138, 0.3);
-        }
+        /* SVG 花束样式 */
+        .flower-svg { width: 150px; height: 150px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<div class="bg-gradient"></div>
+<canvas id="canvas"></canvas>
 
-<div class="floating-element" style="top: 15%; left: 10%; font-size: 30px;">🌸</div>
-<div class="floating-element" style="top: 60%; right: 15%; font-size: 25px; animation-delay: 2s;">🍐</div>
-<div class="floating-element" style="bottom: 20%; left: 15%; font-size: 20px; animation-delay: 4s;">🥛</div>
+<div class="music-player" id="musicBtn" onclick="toggleMusic()">
+    <span style="font-size: 20px;">🎵</span>
+    <audio id="bgMusic" loop src="https://api.uomg.com/api/rand.music?sort=热歌榜&format=mp3"></audio>
+</div>
 
-<div class="progress-dots" id="dots"></div>
+<div class="swiper">
+    <section class="page active">
+        <div class="flower-svg">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 50C70 20 90 40 50 70C10 40 30 20 50 50Z" fill="#ff8fa3" opacity="0.8">
+                    <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite" />
+                </path>
+                <circle cx="50" cy="50" r="5" fill="#ffd166" />
+                <path d="M50 70V95" stroke="#81b29a" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <h1>致：亲爱的妈妈</h1>
+        <p class="quote" style="margin-top: 20px;">跨越千里的快递盒里<br>藏着您最温柔的叮嘱</p>
+    </section>
 
-<div class="swiper-container" id="container">
-    <section class="section active">
-        <p class="subtitle">TO MY DEAREST MOM</p>
-        <h1 class="title-main">母亲节快乐</h1>
-        <div style="font-size: 14px; color: #9a7a7a; margin-top: 20px;">
-            向上滑动 · 开启这份跨越千里的心意
+    <section class="page">
+        <div class="card">
+            <span style="font-size: 50px;">🍐</span>
+            <p class="quote">
+                在宿舍拆开那箱<span class="highlight">家乡的梨</span>时，<br>
+                室友都说味道好甜。<br>
+                但我知道，最甜的是您怕我<br>
+                在外地照顾不好自己的那颗心。
+            </p>
         </div>
     </section>
 
-    <section class="section">
-        <div class="glass-card">
-            <div style="font-size: 40px; margin-bottom: 20px;">🍐</div>
-            <h2 style="color: #d4748a; margin-bottom: 15px;">这一箱梨</h2>
-            <div class="content-text">
-                妈，在学校收到那箱<span class="highlight-item">家乡的梨</span>了。<br>
-                快递盒子沉甸甸的，<br>
-                我知道那是您怕我在北方干燥，<br>
-                特意寄来的“滋润”。
-            </div>
+    <section class="page">
+        <div class="card">
+            <span style="font-size: 50px;">🥛</span>
+            <p class="quote">
+                那袋沉甸甸的<span class="highlight">奶粉</span>，<br>
+                每天早晨冲一杯，<br>
+                热气腾腾的时候，<br>
+                就像您坐在我床边催我起床一样。
+            </p>
         </div>
     </section>
 
-    <section class="section">
-        <div class="circle-deco">🥛</div>
-        <h2 style="color: #d4748a; margin-bottom: 15px;">那袋奶粉</h2>
-        <div class="content-text">
-            还有那袋叮嘱我<span class="highlight-item">睡前记得喝</span>的奶粉。<br>
-            虽然我已经在读大学，<br>
-            但在您的快递包裹里，<br>
-            我好像永远是那个没长大的孩子。
-        </div>
+    <section class="page">
+        <div style="font-size: 60px; margin-bottom: 20px;">❤️</div>
+        <p class="quote" style="padding: 0 20px;">
+            读了大学才发现，<br>
+            微信步数的每一次更新，<br>
+            和包裹里塞得满满当当的食物，<br>
+            是您跨越千山万水，<br>
+            <span class="highlight">正在爱着我的证明。</span>
+        </p>
     </section>
 
-    <section class="section">
-        <div class="glass-card">
-            <h2 style="color: #d4748a; margin-bottom: 15px;">远方的爱</h2>
-            <div class="content-text">
-                以前总觉得这些东西到处能买到，<br>
-                现在才明白，<br>
-                <span class="highlight-item">您寄来的，是外面买不到的挂念。</span><br>
-                每一步微信步数里的关注，<br>
-                每一个包裹里的细致，<br>
-                孩子都感受到了。
-            </div>
-            <button class="btn-interact" onclick="showSurprise()">点击开启祝福</button>
-        </div>
-    </section>
-
-    <section class="section">
-        <p class="subtitle" style="margin-bottom: 20px;">MAY 10, 2026</p>
-        <div class="content-text" style="font-size: 1.3rem;">
-            愿妈妈：<br>
-            <span style="font-size: 2rem; color: #d4748a; display: block; margin: 15px 0;">永远被爱，岁岁平安</span>
-            在这个离家千里的母亲节，<br>
-            祝您快乐，不止今天。
-        </div>
-        <div style="margin-top: 40px; font-family: 'Ma Shan Zheng'; font-size: 1.5rem;">爱您的孩子</div>
+    <section class="page">
+        <h1 style="font-size: 2.5rem;">母亲节快乐</h1>
+        <p class="quote">
+            愿岁月对您温柔以待，<br>
+            不止在今天，而在岁岁年年。
+        </p>
+        <div style="margin-top: 30px; font-family: 'Ma Shan Zheng'; font-size: 1.5rem; color: var(--accent);">爱您的：孩子</div>
     </section>
 </div>
 
-<div class="scroll-hint">↓</div>
+<div class="arrow">向上滑动解锁心意</div>
 
 <script>
-    let currentIndex = 0;
-    const sections = document.querySelectorAll('.section');
-    const container = document.getElementById('container');
-    const dotsContainer = document.getElementById('dots');
-    let startY = 0;
-
-    // 初始化进度点
-    sections.forEach((_, i) => {
-        const dot = document.createElement('div');
-        dot.className = `dot ${i === 0 ? 'active' : ''}`;
-        dotsContainer.appendChild(dot);
-    });
-
-    // 触摸交互逻辑
-    window.addEventListener('touchstart', e => startY = e.touches[0].pageY);
-    
-    window.addEventListener('touchend', e => {
-        const deltaY = e.changedTouches[0].pageY - startY;
-        if (Math.abs(deltaY) > 50) {
-            if (deltaY < 0 && currentIndex < sections.length - 1) {
-                updateSection(currentIndex + 1);
-            } else if (deltaY > 0 && currentIndex > 0) {
-                updateSection(currentIndex - 1);
-            }
+    // 1. 音乐控制逻辑
+    const music = document.getElementById('bgMusic');
+    const btn = document.getElementById('musicBtn');
+    function toggleMusic() {
+        if (music.paused) {
+            music.play();
+            btn.classList.add('playing');
+        } else {
+            music.pause();
+            btn.classList.remove('playing');
         }
+    }
+
+    // 2. 全屏翻页逻辑
+    let cur = 0;
+    const pages = document.querySelectorAll('.page');
+    let isScrolling = false;
+
+    window.addEventListener('wheel', (e) => {
+        if(isScrolling) return;
+        if(e.deltaY > 0) go(cur + 1);
+        else go(cur - 1);
     });
 
-    function updateSection(index) {
-        sections[currentIndex].classList.remove('active');
-        currentIndex = index;
-        sections[currentIndex].classList.add('active');
-        
-        // 更新进度点
-        const dots = document.querySelectorAll('.dot');
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === currentIndex);
+    let touchY = 0;
+    window.addEventListener('touchstart', e => touchY = e.touches[0].clientY);
+    window.addEventListener('touchend', e => {
+        let diff = e.changedTouches[0].clientY - touchY;
+        if(Math.abs(diff) < 50) return;
+        if(diff < 0) go(cur + 1);
+        else go(cur - 1);
+    });
+
+    function go(idx) {
+        if(idx < 0 || idx >= pages.length) return;
+        isScrolling = true;
+        pages[cur].classList.remove('active');
+        cur = idx;
+        pages[cur].classList.add('active');
+        setTimeout(() => isScrolling = false, 1000);
+        document.querySelector('.arrow').style.opacity = (cur === pages.length - 1) ? '0' : '1';
+    }
+
+    // 3. 背景粒子交互效果 (爱心与花瓣)
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = canvas.height + 20;
+            this.size = Math.random() * 15 + 5;
+            this.speedY = Math.random() * 1 + 0.5;
+            this.speedX = Math.sin(Math.random() * 10) * 0.5;
+            this.type = Math.random() > 0.5 ? '❤️' : '🌸';
+            this.opacity = Math.random() * 0.5 + 0.2;
+        }
+        update() {
+            this.y -= this.speedY;
+            this.x += this.speedX;
+            if (this.y < -20) this.reset();
+        }
+        draw() {
+            ctx.globalAlpha = this.opacity;
+            ctx.font = `${this.size}px Arial`;
+            ctx.fillText(this.type, this.x, this.y);
+        }
+    }
+
+    for(let i=0; i<30; i++) particles.push(new Particle());
+
+    function animate() {
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
         });
-
-        // 最后一页隐藏箭头
-        document.querySelector('.scroll-hint').style.display = 
-            currentIndex === sections.length - 1 ? 'none' : 'block';
+        requestAnimationFrame(animate);
     }
+    animate();
 
-    function showSurprise() {
-        alert("❤️ 妈妈，我爱您！");
-        updateSection(4);
-    }
+    // 提醒：首次点击页面启动音乐
+    document.body.addEventListener('click', () => {
+        if(music.paused) toggleMusic();
+    }, {once: true});
 </script>
 </body>
 </html>
