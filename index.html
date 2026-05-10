@@ -3,275 +3,361 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>给妈妈的专属树洞</title>
-    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;600&display=swap" rel="stylesheet">
+    <title>致最亲爱的妈妈</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@200;400;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --accent: #ff8fa3;
-            --glass: rgba(255, 255, 255, 0.25);
-            --text: #5a4747;
+        :root { 
+            --accent: #8e735b; 
+            --primary: #e6b3b3; 
+            --text-main: #2c3e50;
+            --text-sub: #5d6d7e;
+            --bg-base: #fdfcfb;
+            --glass: rgba(255, 255, 255, 0.65);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Noto Serif SC', serif;
-            background: #fff5f7;
-            color: var(--text);
-            overflow: hidden;
-            height: 100vh;
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Noto Serif SC', serif; 
+            background: var(--bg-base);
+            overflow: hidden; 
+            height: 100vh; 
+            color: var(--text-main);
         }
 
-        /* 动态粒子背景画布 */
-        #canvas {
-            position: fixed;
-            top: 0; left: 0;
-            z-index: -1;
-            background: linear-gradient(180deg, #fff5f7 0%, #ffe4e9 100%);
+        /* 进度条：增加仪式感 */
+        .progress-bar {
+            position: fixed; top: 0; left: 0; height: 3px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            z-index: 10001; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
         }
 
-        /* 音乐播放器 */
-        .music-player {
-            position: fixed;
-            top: 20px; right: 20px;
-            z-index: 1000;
-            width: 40px; height: 40px;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            border: 1px solid rgba(255,255,255,0.5);
-            animation: rotate 5s linear infinite;
-            animation-play-state: paused;
-            cursor: pointer;
-        }
-        .music-player.playing { animation-play-state: running; }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* 全屏翻页系统 */
-        .swiper {
-            height: 100vh; width: 100%;
-            position: relative;
+        /* 背景画布 */
+        #particle-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; background: radial-gradient(circle at center, #fff 0%, #f9f4f4 100%);
         }
 
+        /* 现代磨砂封面 */
+        #mask {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-base); z-index: 10000; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; transition: 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
+        .flower-init {
+            width: 80px; height: 80px; margin-bottom: 40px;
+            fill: none; stroke: var(--primary); stroke-width: 1.5;
+            stroke-dasharray: 300; stroke-dashoffset: 300;
+            animation: drawLine 3s infinite alternate;
+        }
+        @keyframes drawLine { to { stroke-dashoffset: 0; } }
+
+        .start-btn {
+            padding: 12px 35px; background: none; color: var(--accent);
+            border: 1px solid var(--accent); border-radius: 30px; font-size: 0.85rem;
+            letter-spacing: 4px; cursor: pointer; transition: 0.4s;
+        }
+        .start-btn:hover { background: var(--accent); color: white; box-shadow: 0 5px 15px rgba(142,115,91,0.2); }
+
+        .music-toggle {
+            position: fixed; top: 25px; right: 25px; z-index: 999;
+            width: 32px; height: 32px; cursor: pointer; display: none;
+        }
+        .rotate { animation: rot 10s linear infinite; }
+        @keyframes rot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* 内容页面 */
+        .swiper { height: 100vh; position: relative; }
         .page {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            padding: 30px;
-            opacity: 0;
-            transform: scale(1.1);
-            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
-            pointer-events: none;
-            text-align: center;
+            position: absolute; width: 100%; height: 100%; padding: 0 8%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; opacity: 0; transition: 1s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none; transform: scale(1.05);
         }
+        .page.active { opacity: 1; pointer-events: auto; transform: scale(1); }
 
-        .page.active {
-            opacity: 1;
-            transform: scale(1);
-            pointer-events: auto;
-        }
-
-        /* 高级感文字效果 */
-        h1 { font-family: 'Ma Shan Zheng', cursive; font-size: 3rem; color: var(--accent); margin-bottom: 1rem; }
-        .quote { font-size: 1.1rem; line-height: 2; letter-spacing: 1px; color: #7d6666; }
-        .highlight { color: var(--accent); font-weight: 600; border-bottom: 2px dashed var(--accent); }
-
-        /* 磨砂玻璃卡片 */
-        .card {
+        .card { 
             background: var(--glass);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.4);
-            border-radius: 40px 10px 40px 10px;
-            padding: 35px 25px;
-            box-shadow: 0 20px 50px rgba(255, 143, 163, 0.15);
-            max-width: 90%;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 45px 25px; 
+            border-radius: 24px;
+            width: 100%; max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.03);
         }
 
-        /* 引导动画 */
-        .arrow {
-            position: fixed; bottom: 20px; left: 50%;
-            transform: translateX(-50%);
-            font-size: 20px; color: var(--accent);
-            animation: bounce 2s infinite;
+        .t-line { 
+            display: block; font-family: 'Ma Shan Zheng', cursive; 
+            font-size: 2.6rem; line-height: 1.5;
+            background: linear-gradient(45deg, var(--accent), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        @keyframes bounce { 0%,20%,50%,80%,100% {transform:translateX(-50%) translateY(0)} 40% {transform:translateX(-50%) translateY(-10px)} 60% {transform:translateX(-50%) translateY(-5px)} }
+        .desc { 
+            font-size: 0.95rem; line-height: 2.4; 
+            letter-spacing: 1.5px; color: var(--text-sub); 
+            font-weight: 300;
+        }
+        .focus { color: var(--primary); font-weight: 500; border-bottom: 1px dashed var(--primary); }
 
-        /* SVG 花束样式 */
-        .flower-svg { width: 150px; height: 150px; margin-bottom: 20px; }
+        .carnation-svg { width: 140px; height: 140px; margin-bottom: 25px; filter: drop-shadow(0 8px 15px rgba(217,167,167,0.3)); }
+
+        .scroll-tip { 
+            position: fixed; bottom: 35px; width: 100%; text-align: center; 
+            font-size: 10px; color: var(--accent); opacity: 0.6; 
+            letter-spacing: 2px; animation: bounce 2s infinite;
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+        /* 文本入场动画 */
+        .animate-text { opacity: 0; transform: translateY(20px); transition: 0.8s; }
+        .active .animate-text { opacity: 1; transform: translateY(0); }
+        .delay-1 { transition-delay: 0.3s; }
+        .delay-2 { transition-delay: 0.6s; }
     </style>
 </head>
 <body>
 
-<canvas id="canvas"></canvas>
+<div class="progress-bar" id="pb"></div>
+<canvas id="particle-canvas"></canvas>
 
-<div class="music-player" id="musicBtn" onclick="toggleMusic()">
-    <span style="font-size: 20px;">🎵</span>
-    <audio id="bgMusic" loop src="https://api.uomg.com/api/rand.music?sort=热歌榜&format=mp3"></audio>
+<div id="mask">
+    <svg class="flower-init" viewBox="0 0 100 100">
+        <path d="M50,85 C50,85 35,70 35,55 C35,45 42,40 50,48 C58,40 65,45 65,55 C65,70 50,85 50,85" />
+    </svg>
+    <button class="start-btn" onclick="initExperience()">开启思念</button>
+</div>
+
+<audio id="bgm" loop preload="auto">
+    <source src="mom-bgm.mp3" type="audio/mpeg">
+</audio>
+
+<div class="music-toggle" id="mIcon" onclick="toggleMusic()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#b08d57" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9 12l6-4v8z"></path>
+    </svg>
 </div>
 
 <div class="swiper">
     <section class="page active">
-        <div class="flower-svg">
-            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M50 50C70 20 90 40 50 70C10 40 30 20 50 50Z" fill="#ff8fa3" opacity="0.8">
-                    <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite" />
-                </path>
-                <circle cx="50" cy="50" r="5" fill="#ffd166" />
-                <path d="M50 70V95" stroke="#81b29a" stroke-width="2" stroke-linecap="round"/>
+        <div class="title-group animate-text">
+            <span class="t-line">岁序常易</span>
+            <span class="t-line">华章日新</span>
+        </div>
+        <p class="desc animate-text delay-1">妈，见字如面<br>屏幕微光里，是跨越山海的告白<br>这不仅是一行行代码<br>更是我想握住您手心的温度</p>
+        <div class="scroll-tip">轻触上滑 · 阅读心声</div>
+    </section>
+
+    <section class="page">
+        <div class="card">
+            <p class="desc animate-text">
+                您总是第一个点赞我的<span class="focus">微信步数</span><br>
+                在那些我步履匆匆的日子里<br>
+                数字跳动间，是您在确认我的平稳<br>
+                而我也在排行榜里<br>
+                捕捉您在远方，依然健康的讯息
+            </p>
+        </div>
+    </section>
+
+    <section class="page">
+        <div class="card">
+            <p class="desc animate-text">
+                那一箱您在云端<span class="focus">悉心挑选</span>的清梨<br>
+                跨越千里，如约抵达到我的手心<br>
+                室友们只道是果实鲜甜<br>
+                我却读懂了<br>
+                您在下单按键里，藏下的万般牵挂
+            </p>
+        </div>
+    </section>
+
+    <section class="page">
+        <div class="card">
+            <p class="desc animate-text">
+                微信群里叮咚响起的<span class="focus">“吃饭了吗”</span><br>
+                是最平常、也最深情的问候<br>
+                即便隔着屏幕，即便相距甚远<br>
+                那些琐琐碎碎的关心<br>
+                依然是我在这座城市里，最心安的背景音
+            </p>
+        </div>
+    </section>
+
+    <section class="page">
+        <div class="card">
+            <p class="desc animate-text">
+                晨间那杯温热的<span class="focus">奶粉</span><br>
+                升腾的雾气，模糊了城市的边界<br>
+                在疾驰而过的赶课途中<br>
+                总有一股暖意<br>
+                让我确信，家从未远去
+            </p>
+        </div>
+    </section>
+
+    <section class="page">
+        <div class="card">
+            <p class="desc animate-text">
+                习惯了在<span class="focus">视频聊天</span>里见您<br>
+                简单地聊聊近况，听听彼此的声音<br>
+                您总在镜头那边端详着我<br>
+                笑着聊些近况、拉些家常<br>
+                三言两语、时候不长，却让我倍感温馨
+            </p>
+        </div>
+    </section>
+
+    <section class="page">
+        <div class="carnation-svg animate-text">
+            <svg viewBox="0 0 200 200">
+                <path d="M100,185 Q98,140 100,110" fill="none" stroke="#6b7a61" stroke-width="2" />
+                <g fill="#e2b4b4" stroke="#d4a7a7" stroke-width="0.3">
+                    <path d="M100,110 C75,120 60,95 80,85 C60,75 75,50 100,65 C125,50 140,75 120,85 C140,95 125,120 100,110 Z" opacity="0.6" />
+                    <path d="M100,105 C85,110 75,98 88,90 C78,82 88,70 100,78 C112,70 122,82 112,90 C125,98 115,110 100,105 Z" opacity="0.8" />
+                </g>
             </svg>
         </div>
-        <h1>致：亲爱的妈妈</h1>
-        <p class="quote" style="margin-top: 20px;">跨越千里的快递盒里<br>藏着您最温柔的叮嘱</p>
-    </section>
-
-    <section class="page">
-        <div class="card">
-            <span style="font-size: 50px;">🍐</span>
-            <p class="quote">
-                在宿舍拆开那箱<span class="highlight">家乡的梨</span>时，<br>
-                室友都说味道好甜。<br>
-                但我知道，最甜的是您怕我<br>
-                在外地照顾不好自己的那颗心。
+        <div class="card animate-text delay-1">
+            <p class="desc">
+                为您种下一束<br><span class="focus">岁月中永恒的康乃馨</span><br>
+                愿时光在您眉间慢些走<br>
+                愿您的笑靥，永远如今日般从容
             </p>
         </div>
     </section>
 
     <section class="page">
-        <div class="card">
-            <span style="font-size: 50px;">🥛</span>
-            <p class="quote">
-                那袋沉甸甸的<span class="highlight">奶粉</span>，<br>
-                每天早晨冲一杯，<br>
-                热气腾腾的时候，<br>
-                就像您坐在我床边催我起床一样。
-            </p>
+        <div class="title-group animate-text">
+            <span class="t-line">浮生一日</span>
+            <span class="t-line">眷恋永恒</span>
         </div>
-    </section>
-
-    <section class="page">
-        <div style="font-size: 60px; margin-bottom: 20px;">❤️</div>
-        <p class="quote" style="padding: 0 20px;">
-            读了大学才发现，<br>
-            微信步数的每一次更新，<br>
-            和包裹里塞得满满当当的食物，<br>
-            是您跨越千山万水，<br>
-            <span class="highlight">正在爱着我的证明。</span>
-        </p>
-    </section>
-
-    <section class="page">
-        <h1 style="font-size: 2.5rem;">母亲节快乐</h1>
-        <p class="quote">
-            愿岁月对您温柔以待，<br>
-            不止在今天，而在岁岁年年。
-        </p>
-        <div style="margin-top: 30px; font-family: 'Ma Shan Zheng'; font-size: 1.5rem; color: var(--accent);">爱您的：孩子</div>
+        <p class="desc animate-text delay-1">不只在今日，更在往后每一个朝夕<br>愿您被万物温柔对待，岁岁常欢愉</p>
+        <div class="animate-text delay-2" style="margin-top: 50px;">
+            <p style="font-family: 'Ma Shan Zheng'; font-size: 1.6rem; color: var(--accent);">爱您的孩子 · 敬上</p>
+            <p style="font-size: 10px; color: var(--text-sub); margin-top: 15px; letter-spacing: 4px; opacity: 0.6;">贰零贰陆 · 孟夏</p>
+        </div>
     </section>
 </div>
 
-<div class="arrow">向上滑动解锁心意</div>
-
 <script>
-    // 1. 音乐控制逻辑
-    const music = document.getElementById('bgMusic');
-    const btn = document.getElementById('musicBtn');
+    const audio = document.getElementById('bgm');
+    const mIcon = document.getElementById('mIcon');
+    const progressBar = document.getElementById('pb');
+    let curPage = 0;
+    const pages = document.querySelectorAll('.page');
+    let isLocked = false;
+
+    function initExperience() {
+        document.getElementById('mask').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('mask').style.display = 'none';
+            mIcon.style.display = 'block';
+            updateProgress();
+        }, 1200);
+        
+        audio.play().then(() => mIcon.classList.add('rotate')).catch(() => {
+            document.body.addEventListener('click', () => {
+                audio.play(); mIcon.classList.add('rotate');
+            }, { once: true });
+        });
+    }
+
     function toggleMusic() {
-        if (music.paused) {
-            music.play();
-            btn.classList.add('playing');
-        } else {
-            music.pause();
-            btn.classList.remove('playing');
+        if(audio.paused) { audio.play(); mIcon.classList.add('rotate'); }
+        else { audio.pause(); mIcon.classList.remove('rotate'); }
+    }
+
+    function updateProgress() {
+        const p = ((curPage + 1) / pages.length) * 100;
+        progressBar.style.width = p + '%';
+    }
+
+    function switchPage(dir) {
+        if(isLocked) return;
+        const target = curPage + dir;
+        if(target >= 0 && target < pages.length) {
+            isLocked = true;
+            // 触觉反馈 (仅部分安卓支持)
+            if (window.navigator.vibrate) window.navigator.vibrate(10);
+            
+            pages[curPage].classList.remove('active');
+            curPage = target;
+            pages[curPage].classList.add('active');
+            updateProgress();
+            
+            setTimeout(() => { isLocked = false; }, 1000);
+            document.querySelector('.scroll-tip').style.opacity = (curPage === pages.length - 1) ? '0' : '0.6';
         }
     }
 
-    // 2. 全屏翻页逻辑
-    let cur = 0;
-    const pages = document.querySelectorAll('.page');
-    let isScrolling = false;
-
-    window.addEventListener('wheel', (e) => {
-        if(isScrolling) return;
-        if(e.deltaY > 0) go(cur + 1);
-        else go(cur - 1);
-    });
-
-    let touchY = 0;
-    window.addEventListener('touchstart', e => touchY = e.touches[0].clientY);
+    // 交互监听
+    let startY = 0;
+    window.addEventListener('touchstart', e => startY = e.touches[0].pageY);
     window.addEventListener('touchend', e => {
-        let diff = e.changedTouches[0].clientY - touchY;
-        if(Math.abs(diff) < 50) return;
-        if(diff < 0) go(cur + 1);
-        else go(cur - 1);
+        let diff = startY - e.changedTouches[0].pageY;
+        if(Math.abs(diff) > 50) switchPage(diff > 0 ? 1 : -1);
     });
+    window.addEventListener('wheel', e => { if(!isLocked) switchPage(e.deltaY > 0 ? 1 : -1); });
 
-    function go(idx) {
-        if(idx < 0 || idx >= pages.length) return;
-        isScrolling = true;
-        pages[cur].classList.remove('active');
-        cur = idx;
-        pages[cur].classList.add('active');
-        setTimeout(() => isScrolling = false, 1000);
-        document.querySelector('.arrow').style.opacity = (cur === pages.length - 1) ? '0' : '1';
-    }
-
-    // 3. 背景粒子交互效果 (爱心与花瓣)
-    const canvas = document.getElementById('canvas');
+    /* 优化后的花瓣粒子系统 */
+    const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
 
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    class Particle {
-        constructor() {
-            this.reset();
-        }
-        reset() {
+    class Petal {
+        constructor() { this.init(); }
+        init() {
             this.x = Math.random() * canvas.width;
-            this.y = canvas.height + 20;
-            this.size = Math.random() * 15 + 5;
-            this.speedY = Math.random() * 1 + 0.5;
-            this.speedX = Math.sin(Math.random() * 10) * 0.5;
-            this.type = Math.random() > 0.5 ? '❤️' : '🌸';
-            this.opacity = Math.random() * 0.5 + 0.2;
+            this.y = Math.random() * canvas.height - canvas.height;
+            this.size = Math.random() * 6 + 4;
+            this.speedX = Math.random() * 1 - 0.5;
+            this.speedY = Math.random() * 1.2 + 0.5;
+            this.angle = Math.random() * 360;
+            this.spin = Math.random() * 2 - 1;
+            this.color = Math.random() > 0.5 ? '#fce4ec' : '#f8bbd0';
+            this.opacity = Math.random() * 0.4 + 0.2;
         }
         update() {
-            this.y -= this.speedY;
-            this.x += this.speedX;
-            if (this.y < -20) this.reset();
+            this.y += this.speedY;
+            this.x += Math.sin(this.y / 60) * 0.5;
+            this.angle += this.spin;
+            if (this.y > canvas.height) this.init();
         }
         draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle * Math.PI / 180);
             ctx.globalAlpha = this.opacity;
-            ctx.font = `${this.size}px Arial`;
-            ctx.fillText(this.type, this.x, this.y);
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, this.size, this.size/1.8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
         }
     }
 
-    for(let i=0; i<30; i++) particles.push(new Particle());
+    function initParticles() {
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        particles = [];
+        const count = Math.floor(canvas.width / 15); 
+        for (let i = 0; i < count; i++) particles.push(new Petal());
+    }
 
     function animate() {
-        ctx.clearRect(0,0, canvas.width, canvas.height);
-        particles.forEach(p => {
-            p.update();
-            p.draw();
-        });
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
         requestAnimationFrame(animate);
     }
-    animate();
 
-    // 提醒：首次点击页面启动音乐
-    document.body.addEventListener('click', () => {
-        if(music.paused) toggleMusic();
-    }, {once: true});
+    window.addEventListener('resize', initParticles);
+    initParticles();
+    animate();
 </script>
 </body>
 </html>
